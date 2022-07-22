@@ -2,6 +2,7 @@ package com.codewithvu.stopwatch
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.os.SystemClock
 import android.widget.Button
 import android.widget.Chronometer
@@ -11,11 +12,23 @@ class MainActivity : AppCompatActivity() {
     var running = false
     var offset: Long = 0
 
+    val OFFSET_KEY = "offset"
+    val RUNNING_KEY = "running"
+    val BASE_KEY = "base"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         stopWatch = findViewById<Chronometer>(R.id.stopwatch)
+
+        // Restore the previous state
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getBoolean(RUNNING_KEY)) {
+                stopWatch.base = savedInstanceState.getLong(BASE_KEY)
+                stopWatch.start()
+            } else setBaseTime()
+        }
 
         // Start the stopwatch if is is not running
         val start_button = findViewById<Button>(R.id.start_button)
@@ -43,6 +56,13 @@ class MainActivity : AppCompatActivity() {
             offset = 0
             setBaseTime()
         }
+    }
+
+    override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        savedInstanceState.putLong(OFFSET_KEY, offset)
+        savedInstanceState.putBoolean(RUNNING_KEY, running)
+        savedInstanceState.putLong(BASE_KEY, stopWatch.base)
+        super.onSaveInstanceState(savedInstanceState)
     }
 
     // Update the stopwatch.base time, allowing for any offset
